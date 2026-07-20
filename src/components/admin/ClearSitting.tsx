@@ -60,7 +60,8 @@ export function ClearSitting({
             <h2>Clear this sitting?</h2>
             <p className="confirm-summary">
               Remove all registrations for <strong>{sessionLabel}</strong> ({guestCount} guest
-              {guestCount === 1 ? "" : "s"}). Sittings stay; only guest data is deleted.
+              {guestCount === 1 ? "" : "s"}). Their emails and phones will be freed so they can
+              register again. Sittings stay.
             </p>
             <label className="danger-zone-label" htmlFor={`clear-${sessionId}`}>
               Type <kbd>DELETE</kbd> to confirm

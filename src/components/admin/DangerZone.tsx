@@ -32,8 +32,8 @@ export function DangerZone({ embedded = false }: { embedded?: boolean }) {
       {!embedded ? <div className="danger-zone-rule" aria-hidden="true" /> : null}
       <h2 id="danger-zone-title">{embedded ? "Delete all registrations" : "Danger zone"}</h2>
       <p className="danger-zone-disclaimer">
-        Deleting registrations is irreversible. All guest and party records will be removed and
-        seats will become available again. Dinner sittings and capacities are not deleted.
+        Deleting registrations permanently removes guest records (including email and phone). Those
+        contacts can register again afterward. Seats reopen; dinner sittings and capacities stay.
       </p>
       <label className="danger-zone-label" htmlFor="delete-confirm">
         Type <kbd>DELETE</kbd> to enable wipe

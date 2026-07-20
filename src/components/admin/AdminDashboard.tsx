@@ -329,13 +329,16 @@ export function AdminDashboard({
         <details className="admin-manage">
           <summary>
             <span>Manage data</span>
-            <span className="muted">Clear a sitting or wipe all registrations</span>
+            <span className="muted">
+              Clear a sitting or wipe all — deleted guests can register again
+            </span>
           </summary>
           <div className="admin-manage-body">
             <div className="admin-manage-block">
               <h3>Clear this sitting</h3>
               <p className="muted">
-                Removes guests for the sitting you have selected above. Dinner sittings stay.
+                Removes guests for the sitting you have selected above. Their emails and phones can
+                be used to register again. Dinner sittings stay.
               </p>
               {filter === "all" ? (
                 <p className="admin-manage-hint">Select a sitting tab first to clear it.</p>

@@ -27,6 +27,32 @@ async function refreshAdminCaches() {
   revalidatePath("/rsvp");
 }
 
+/**
+ * Hard-delete guests then parties so unique email/phone indexes free up
+ * and those contacts can register again.
+ */
+async function wipeParties(partyIds: string[]): Promise<AdminDataResult> {
+  if (partyIds.length === 0) return { ok: true };
+
+  const supabase = createServiceClient();
+
+  const { error: guestError } = await supabase
+    .from("rsvp_guests")
+    .delete()
+    .in("party_id", partyIds);
+
+  if (guestError) return { ok: false, error: guestError.message };
+
+  const { error: partyError } = await supabase
+    .from("rsvp_parties")
+    .delete()
+    .in("id", partyIds);
+
+  if (partyError) return { ok: false, error: partyError.message };
+
+  return { ok: true };
+}
+
 export async function deleteAllRegistrations(confirm: string): Promise<AdminDataResult> {
   const auth = await assertAdmin();
   if (auth) return auth;
@@ -34,12 +60,14 @@ export async function deleteAllRegistrations(confirm: string): Promise<AdminData
   if (confirmErr) return confirmErr;
 
   const supabase = createServiceClient();
-  const { error } = await supabase
+  const { data: parties, error: listError } = await supabase
     .from("rsvp_parties")
-    .delete()
-    .gte("created_at", "1970-01-01");
+    .select("id");
 
-  if (error) return { ok: false, error: error.message };
+  if (listError) return { ok: false, error: listError.message };
+
+  const result = await wipeParties((parties ?? []).map((p) => p.id));
+  if (!result.ok) return result;
 
   await refreshAdminCaches();
   return { ok: true };
@@ -59,12 +87,15 @@ export async function deleteSessionRegistrations(
   }
 
   const supabase = createServiceClient();
-  const { error } = await supabase
+  const { data: parties, error: listError } = await supabase
     .from("rsvp_parties")
-    .delete()
+    .select("id")
     .eq("session_id", sessionId);
 
-  if (error) return { ok: false, error: error.message };
+  if (listError) return { ok: false, error: listError.message };
+
+  const result = await wipeParties((parties ?? []).map((p) => p.id));
+  if (!result.ok) return result;
 
   await refreshAdminCaches();
   return { ok: true };
