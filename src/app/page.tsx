@@ -91,7 +91,7 @@ export default async function HomePage() {
           </div>
           <div>
             {loadError ? (
-              <p className="muted">Connect Supabase env vars to load live seat counts.</p>
+              <p className="muted">Unable to load live seat counts right now.</p>
             ) : (
               <>
                 <div className="seat-strip" aria-label="Remaining seats by session">
@@ -116,7 +116,7 @@ export default async function HomePage() {
                   })}
                 </div>
                 <p className="muted" style={{ marginTop: "1rem", fontSize: "0.9rem" }}>
-                  Live seat counts from Supabase.
+                  Live seat counts.
                 </p>
               </>
             )}
