@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { adminLogoutAction } from "@/app/actions/admin";
+import { BrandMark } from "@/components/BrandMark";
 import { ClearSitting } from "@/components/admin/ClearSitting";
 import { DangerZone } from "@/components/admin/DangerZone";
 import { ExportToolbar } from "@/components/admin/ExportToolbar";
@@ -48,9 +48,7 @@ export default async function AdminPage() {
       <header className="admin-top">
         <div className="inner">
           <div>
-            <Link className="brand-mark" href="/">
-              Kind Table
-            </Link>
+            <BrandMark />
             <span className="admin-badge">Admin</span>
           </div>
           <div className="actions">

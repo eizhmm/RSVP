@@ -19,6 +19,13 @@ const body = Outfit({
 export const metadata: Metadata = {
   title: "Kind Table — Charity Donation Dinner RSVP",
   description: "Reserve your seat at Kind Table, a charity donation dinner.",
+  icons: {
+    icon: [
+      { url: "/brand/kind-table-mark.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export const preferredRegion = "sin1";

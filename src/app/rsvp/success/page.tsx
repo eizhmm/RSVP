@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { VENUE, formatSessionDate, formatTimeLabel } from "@/lib/event";
 
@@ -38,9 +39,7 @@ export default async function SuccessPage({
     <div className="page-shell">
       <header className="page-header">
         <div className="inner">
-          <Link className="brand-mark" href="/">
-            Kind Table
-          </Link>
+          <BrandMark />
           <Link href="/">Home</Link>
         </div>
       </header>

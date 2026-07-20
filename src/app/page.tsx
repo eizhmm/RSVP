@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 import { getSessionsWithSeats } from "@/lib/rsvp/queries";
 import { VENUE } from "@/lib/event";
 
@@ -19,9 +20,7 @@ export default async function HomePage() {
     <>
       <header className="hero">
         <nav className="site-nav" aria-label="Primary">
-          <Link className="brand-mark" href="/">
-            Kind Table
-          </Link>
+          <BrandMark />
           <div className="nav-links">
             <a href="#about">About</a>
             <Link href="/rsvp">RSVP</Link>

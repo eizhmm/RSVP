@@ -98,11 +98,32 @@ p {
 }
 
 .brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   font-family: var(--font-display);
   font-size: 1.35rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   opacity: 1 !important;
+  line-height: 1;
+}
+
+.brand-mark-logo {
+  width: 1.7rem;
+  height: 1.7rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.brand-mark-text {
+  white-space: nowrap;
+}
+
+.login-brand {
+  display: inline-flex;
+  margin-bottom: 1.25rem;
+  color: var(--ink);
 }
 
 .nav-links {
@@ -649,8 +670,19 @@ p {
   gap: 1rem;
 }
 
+.admin-top .inner > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
 .admin-top .brand-mark {
   font-size: 1.15rem;
+}
+
+.admin-top .brand-mark-logo {
+  width: 1.45rem;
+  height: 1.45rem;
 }
 
 .admin-badge {

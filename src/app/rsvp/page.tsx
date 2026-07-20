@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 import { RsvpForm } from "@/components/RsvpForm";
 import { getSessionsWithSeats } from "@/lib/rsvp/queries";
 
@@ -12,9 +13,7 @@ export default async function RsvpPage() {
     <div className="page-shell">
       <header className="page-header">
         <div className="inner">
-          <Link className="brand-mark" href="/">
-            Kind Table
-          </Link>
+          <BrandMark />
           <Link href="/">← Back</Link>
         </div>
       </header>

@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { adminLoginAction } from "@/app/actions/admin";
+import { BrandMark } from "@/components/BrandMark";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { redirect } from "next/navigation";
 
@@ -14,13 +14,7 @@ export default async function AdminLoginPage({
   return (
     <main className="login-center">
       <form className="login-card" action={adminLoginAction}>
-        <Link
-          className="brand-mark"
-          href="/"
-          style={{ display: "inline-block", marginBottom: "1.25rem", color: "var(--ink)" }}
-        >
-          Kind Table
-        </Link>
+        <BrandMark className="login-brand" />
         <h1>Admin</h1>
         <p className="lead">Sign in to view registration reports for each dinner sitting.</p>
         <div className="form-group">
