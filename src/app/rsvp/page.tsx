@@ -2,7 +2,8 @@ import Link from "next/link";
 import { RsvpForm } from "@/components/RsvpForm";
 import { getSessionsWithSeats } from "@/lib/rsvp/queries";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
+export const preferredRegion = "sin1";
 
 export default async function RsvpPage() {
   const sessions = await getSessionsWithSeats();

@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   description: "Reserve your seat at Kind Table, a charity donation dinner.",
 };
 
+export const preferredRegion = "sin1";
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">

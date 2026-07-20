@@ -1,6 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+let cached: SupabaseClient | null = null;
 
 export function createServiceClient() {
+  if (cached) return cached;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -8,7 +12,9 @@ export function createServiceClient() {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
   }
 
-  return createClient(url, key, {
+  cached = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  return cached;
 }

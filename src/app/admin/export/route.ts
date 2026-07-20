@@ -3,6 +3,7 @@ import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { getAdminReport } from "@/lib/rsvp/queries";
 
 export const dynamic = "force-dynamic";
+export const preferredRegion = "sin1";
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) redirect("/admin/login");

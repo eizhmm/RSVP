@@ -2,7 +2,8 @@ import Link from "next/link";
 import { getSessionsWithSeats } from "@/lib/rsvp/queries";
 import { VENUE } from "@/lib/event";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
+export const preferredRegion = "sin1";
 
 export default async function HomePage() {
   let sessions: Awaited<ReturnType<typeof getSessionsWithSeats>> = [];

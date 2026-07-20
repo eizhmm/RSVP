@@ -3,7 +3,7 @@
 import { createServiceClient } from "@/lib/supabase/admin";
 import { bookingSchema } from "@/lib/rsvp/schema";
 import { sendInvitationEmail } from "@/lib/email/send-invitation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 export type BookingResult =
   | {
@@ -86,6 +86,7 @@ export async function createBooking(raw: unknown): Promise<BookingResult> {
     console.error("Resend failed", err);
   }
 
+  updateTag("sessions");
   revalidatePath("/");
   revalidatePath("/rsvp");
   revalidatePath("/admin");

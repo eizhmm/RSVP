@@ -1,32 +1,32 @@
+import { unstable_cache } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/admin";
 import type { DinnerSession } from "@/lib/event";
 
-export async function getSessionsWithSeats(): Promise<DinnerSession[]> {
+/** Fresh seat counts — use for admin / after writes. */
+export async function fetchSessionsWithSeats(): Promise<DinnerSession[]> {
   const supabase = createServiceClient();
 
-  const { data: sessions, error } = await supabase
-    .from("dinner_sessions")
-    .select("id, event_date, slot_key, slot_label, starts_at, capacity")
-    .order("event_date", { ascending: true })
-    .order("starts_at", { ascending: true });
+  const [sessionsResult, partiesResult] = await Promise.all([
+    supabase
+      .from("dinner_sessions")
+      .select("id, event_date, slot_key, slot_label, starts_at, capacity")
+      .order("event_date", { ascending: true })
+      .order("starts_at", { ascending: true }),
+    supabase.from("rsvp_parties").select("session_id, pax"),
+  ]);
 
-  if (error) throw error;
-
-  const { data: parties, error: partyError } = await supabase
-    .from("rsvp_parties")
-    .select("session_id, pax");
-
-  if (partyError) throw partyError;
+  if (sessionsResult.error) throw sessionsResult.error;
+  if (partiesResult.error) throw partiesResult.error;
 
   const takenBySession = new Map<string, number>();
-  for (const party of parties ?? []) {
+  for (const party of partiesResult.data ?? []) {
     takenBySession.set(
       party.session_id,
       (takenBySession.get(party.session_id) ?? 0) + party.pax,
     );
   }
 
-  return (sessions ?? []).map((session) => {
+  return (sessionsResult.data ?? []).map((session) => {
     const seats_taken = takenBySession.get(session.id) ?? 0;
     return {
       ...session,
@@ -36,9 +36,16 @@ export async function getSessionsWithSeats(): Promise<DinnerSession[]> {
   });
 }
 
+/** Cached for public pages (home / RSVP). Invalidated on booking via revalidateTag("sessions"). */
+export const getSessionsWithSeats = unstable_cache(
+  async () => fetchSessionsWithSeats(),
+  ["sessions-with-seats"],
+  { revalidate: 60, tags: ["sessions"] },
+);
+
 export async function getAdminReport() {
   const supabase = createServiceClient();
-  const sessions = await getSessionsWithSeats();
+  const sessions = await fetchSessionsWithSeats();
 
   const { data: parties, error } = await supabase
     .from("rsvp_parties")

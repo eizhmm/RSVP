@@ -6,6 +6,7 @@ import { getAdminReport } from "@/lib/rsvp/queries";
 import { VENUE, formatSessionDate, formatTimeLabel } from "@/lib/event";
 
 export const dynamic = "force-dynamic";
+export const preferredRegion = "sin1";
 
 export default async function AdminPage() {
   if (!(await isAdminAuthenticated())) redirect("/admin/login");

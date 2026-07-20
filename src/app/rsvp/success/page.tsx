@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/admin";
 import { VENUE, formatSessionDate, formatTimeLabel } from "@/lib/event";
 
 export const dynamic = "force-dynamic";
+export const preferredRegion = "sin1";
 
 export default async function SuccessPage({
   searchParams,
