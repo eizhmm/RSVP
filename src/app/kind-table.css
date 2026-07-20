@@ -162,6 +162,21 @@ p {
   color: var(--moss);
 }
 
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
+
+.btn-danger:hover {
+  background: #7a3232;
+}
+
+.btn-danger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .btn-block {
   width: 100%;
 }
@@ -1747,5 +1762,200 @@ body.invite-open {
 
   .seat-strip {
     grid-template-columns: 1fr;
+  }
+}
+
+/* —— Admin export / danger zone / field errors —— */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.field-error {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: var(--danger);
+  line-height: 1.35;
+}
+
+.form-group.has-error input,
+.form-group.has-error textarea {
+  border-color: rgba(139, 58, 58, 0.55);
+  outline-color: rgba(139, 58, 58, 0.35);
+}
+
+.export-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  padding: 1.15rem 1.25rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--gold);
+}
+
+.export-toolbar-copy h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+}
+
+.export-toolbar-copy p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.export-toolbar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.export-select {
+  appearance: none;
+  min-width: 12rem;
+  padding: 0.65rem 2rem 0.65rem 0.85rem;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--ink);
+  background: var(--cream)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%233d5a4c' d='M1 1l5 5 5-5'/%3E%3C/svg%3E")
+    no-repeat right 0.75rem center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.export-select:focus {
+  outline: 2px solid rgba(61, 90, 76, 0.25);
+  border-color: var(--moss);
+}
+
+.session-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.clear-sitting-btn {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.78rem;
+  color: var(--danger);
+  border-color: rgba(139, 58, 58, 0.35);
+}
+
+.clear-sitting-btn:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: rgba(139, 58, 58, 0.06);
+}
+
+.admin-body .clear-sitting-btn {
+  color: var(--danger);
+}
+
+.danger-zone {
+  margin-top: 2rem;
+  padding: 1.35rem 1.35rem 1.5rem;
+  background: var(--paper);
+  border: 1px solid rgba(139, 58, 58, 0.28);
+  border-left: 3px solid var(--danger);
+}
+
+.danger-zone-rule {
+  width: 2.5rem;
+  height: 2px;
+  background: var(--gold);
+  margin-bottom: 0.85rem;
+}
+
+.danger-zone h2 {
+  margin: 0 0 0.45rem;
+  font-size: 1.25rem;
+  color: var(--danger);
+}
+
+.danger-zone-disclaimer {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  max-width: 42rem;
+}
+
+.danger-zone-label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-bottom: 0.45rem;
+}
+
+.danger-zone-label kbd {
+  display: inline-block;
+  padding: 0.05rem 0.35rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+
+.danger-zone-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.danger-zone-input {
+  min-width: 10rem;
+  padding: 0.7rem 0.85rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.danger-zone-input:focus {
+  outline: 2px solid rgba(139, 58, 58, 0.2);
+  border-color: rgba(139, 58, 58, 0.5);
+}
+
+.danger-confirm .danger-zone-input {
+  width: 100%;
+  margin-bottom: 0.85rem;
+}
+
+.danger-confirm .danger-zone-label {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .export-toolbar-controls {
+    width: 100%;
+  }
+
+  .export-select {
+    width: 100%;
+  }
+
+  .danger-zone-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

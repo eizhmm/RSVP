@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { adminLogoutAction } from "@/app/actions/admin";
+import { ClearSitting } from "@/components/admin/ClearSitting";
+import { DangerZone } from "@/components/admin/DangerZone";
+import { ExportToolbar } from "@/components/admin/ExportToolbar";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { getAdminReport } from "@/lib/rsvp/queries";
 import { VENUE, formatSessionDate, formatTimeLabel } from "@/lib/event";
@@ -17,6 +20,29 @@ export default async function AdminPage() {
       ? 0
       : Math.round((report.totalRegistered / report.totalCapacity) * 100);
 
+  const exportSessions = report.sessions.map(({ session, guests, partyCount }) => ({
+    session: {
+      id: session.id,
+      slot_key: session.slot_key,
+      event_date: session.event_date,
+      starts_at: session.starts_at,
+      slot_label: session.slot_label,
+      capacity: session.capacity,
+      seats_taken: session.seats_taken,
+    },
+    guests: guests.map((g) => ({
+      id: g.id,
+      full_name: g.full_name,
+      phone: g.phone,
+      email: g.email,
+      designation: g.designation,
+      dietary_note: g.dietary_note,
+      party_code: g.party_code,
+      registered_at: g.registered_at,
+    })),
+    partyCount,
+  }));
+
   return (
     <div className="admin-body">
       <header className="admin-top">
@@ -28,9 +54,6 @@ export default async function AdminPage() {
             <span className="admin-badge">Admin</span>
           </div>
           <div className="actions">
-            <a className="btn btn-ghost" href="/admin/export">
-              Export CSV
-            </a>
             <form action={adminLogoutAction}>
               <button className="btn btn-ghost" type="submit">
                 Log out
@@ -74,20 +97,27 @@ export default async function AdminPage() {
           </div>
         </div>
 
+        <ExportToolbar sessions={exportSessions} />
+
         {report.sessions.map(({ session, guests }) => {
           const pct = Math.round((session.seats_taken / session.capacity) * 100);
           const full = session.seats_left === 0 && session.seats_taken > 0;
+          const sessionLabel = `${formatSessionDate(session.event_date).replace(/,/g, "")} · ${formatTimeLabel(session.starts_at, session.slot_label)}`;
           return (
             <section className="session-block" key={session.id}>
               <div className="session-head">
-                <h3>
-                  {formatSessionDate(session.event_date).replace(/,/g, "")} ·{" "}
-                  {formatTimeLabel(session.starts_at, session.slot_label)}
-                </h3>
-                <span className={`pill${full ? " full" : ""}`}>
-                  {session.seats_taken} / {session.capacity}{" "}
-                  {full ? "full" : "registered"}
-                </span>
+                <h3>{sessionLabel}</h3>
+                <div className="session-head-actions">
+                  <span className={`pill${full ? " full" : ""}`}>
+                    {session.seats_taken} / {session.capacity}{" "}
+                    {full ? "full" : "registered"}
+                  </span>
+                  <ClearSitting
+                    sessionId={session.id}
+                    sessionLabel={sessionLabel}
+                    guestCount={guests.length}
+                  />
+                </div>
               </div>
               <div className={`bar${full ? " full" : ""}`} aria-hidden="true">
                 <span style={{ width: `${pct}%` }} />
@@ -136,6 +166,8 @@ export default async function AdminPage() {
             </section>
           );
         })}
+
+        <DangerZone />
       </div>
     </div>
   );

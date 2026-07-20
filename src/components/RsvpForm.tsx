@@ -4,6 +4,10 @@ import { useMemo, useState, useTransition } from "react";
 import { createBooking } from "@/app/actions/booking";
 import type { DinnerSession } from "@/lib/event";
 import { VENUE, formatClock, formatSessionDate, formatTimeLabel } from "@/lib/event";
+import {
+  validateBookingDraft,
+  type FieldErrors,
+} from "@/lib/rsvp/schema";
 
 type GuestDraft = {
   fullName: string;
@@ -32,6 +36,11 @@ function arriveHint(startsAt: string) {
   return `Arrive by ${display}:${mins} ${suffix}`;
 }
 
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="field-error">{message}</p>;
+}
+
 export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
   const dates = useMemo(() => {
     const map = new Map<string, DinnerSession[]>();
@@ -48,6 +57,8 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
   const [pax, setPax] = useState(1);
   const [lead, setLead] = useState<GuestDraft>(emptyGuest());
   const [companions, setCompanions] = useState<GuestDraft[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [showErrors, setShowErrors] = useState(false);
   const [error, setError] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [invite, setInvite] = useState<{
@@ -65,13 +76,56 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
   const maxSeats = selected?.seats_left ?? 1;
   const daySessions = date ? sessions.filter((s) => s.event_date === date) : [];
 
+  function draftSnapshot(overrides?: Partial<{
+    date: string;
+    slotKey: string;
+    pax: number;
+    lead: GuestDraft;
+    companions: GuestDraft[];
+  }>) {
+    return {
+      date: overrides?.date ?? date,
+      slotKey: overrides?.slotKey ?? slotKey,
+      pax: overrides?.pax ?? pax,
+      lead: overrides?.lead ?? lead,
+      companions: overrides?.companions ?? companions,
+    };
+  }
+
+  /** Once shown, errors stay until each field becomes valid. */
+  function syncErrors(nextDraft = draftSnapshot(), force = false) {
+    if (!force && !showErrors) return;
+    setFieldErrors(validateBookingDraft(nextDraft));
+  }
+
+  function markTouchedAndValidate(nextDraft = draftSnapshot()) {
+    setShowErrors(true);
+    const errors = validateBookingDraft(nextDraft);
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
+
+  function updateLead<K extends keyof GuestDraft>(key: K, value: GuestDraft[K]) {
+    const next = { ...lead, [key]: value };
+    setLead(next);
+    syncErrors(draftSnapshot({ lead: next }));
+  }
+
+  function updateCompanion(idx: number, key: keyof GuestDraft, value: string) {
+    const next = companions.map((g, i) => (i === idx ? { ...g, [key]: value } : g));
+    setCompanions(next);
+    syncErrors(draftSnapshot({ companions: next }));
+  }
+
   function updatePax(next: number) {
     const capped = Math.max(1, Math.min(maxSeats, next));
     setPax(capped);
     setCompanions((prev) => {
       const copy = [...prev];
       while (copy.length < capped - 1) copy.push(emptyGuest());
-      return copy.slice(0, Math.max(0, capped - 1));
+      const sliced = copy.slice(0, Math.max(0, capped - 1));
+      syncErrors(draftSnapshot({ pax: capped, companions: sliced }));
+      return sliced;
     });
   }
 
@@ -80,13 +134,18 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
     const seat = sessions.find((s) => s.slot_key === key)?.seats_left ?? 1;
     const nextPax = Math.min(pax, seat);
     setPax(nextPax);
-    setCompanions((prev) => prev.slice(0, Math.max(0, nextPax - 1)));
+    setCompanions((prev) => {
+      const sliced = prev.slice(0, Math.max(0, nextPax - 1));
+      syncErrors(draftSnapshot({ slotKey: key, pax: nextPax, companions: sliced }));
+      return sliced;
+    });
   }
 
   function openConfirm(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (!date || !slotKey || !selected) {
+    if (!markTouchedAndValidate()) return;
+    if (!selected) {
       setError("Please choose a date and sitting.");
       return;
     }
@@ -162,52 +221,60 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
         <span className="muted">{VENUE.address}</span>
       </aside>
 
-      <form className="form-panel form-panel-wide" onSubmit={openConfirm}>
+      <form className="form-panel form-panel-wide" onSubmit={openConfirm} noValidate>
         <fieldset className="form-section">
           <legend>Your details</legend>
-          <div className="form-group">
+          <div className={`form-group${fieldErrors["lead.fullName"] ? " has-error" : ""}`}>
             <label htmlFor="name">Full name</label>
             <input
               id="name"
-              required
               value={lead.fullName}
-              onChange={(e) => setLead({ ...lead, fullName: e.target.value })}
+              onChange={(e) => updateLead("fullName", e.target.value)}
+              onBlur={() => markTouchedAndValidate()}
               placeholder="Aisha Rahman"
+              aria-invalid={Boolean(fieldErrors["lead.fullName"])}
             />
+            <FieldError message={fieldErrors["lead.fullName"]} />
           </div>
           <div className="form-row">
-            <div className="form-group">
+            <div className={`form-group${fieldErrors["lead.phone"] ? " has-error" : ""}`}>
               <label htmlFor="phone">Phone</label>
               <input
                 id="phone"
                 type="tel"
-                required
                 value={lead.phone}
-                onChange={(e) => setLead({ ...lead, phone: e.target.value })}
+                onChange={(e) => updateLead("phone", e.target.value)}
+                onBlur={() => markTouchedAndValidate()}
                 placeholder="01X-XXXX XXXX"
+                aria-invalid={Boolean(fieldErrors["lead.phone"])}
               />
+              <FieldError message={fieldErrors["lead.phone"]} />
             </div>
-            <div className="form-group">
+            <div className={`form-group${fieldErrors["lead.email"] ? " has-error" : ""}`}>
               <label htmlFor="email">Email</label>
               <input
                 id="email"
                 type="email"
-                required
                 value={lead.email}
-                onChange={(e) => setLead({ ...lead, email: e.target.value })}
+                onChange={(e) => updateLead("email", e.target.value)}
+                onBlur={() => markTouchedAndValidate()}
                 placeholder="you@example.com"
+                aria-invalid={Boolean(fieldErrors["lead.email"])}
               />
+              <FieldError message={fieldErrors["lead.email"]} />
             </div>
           </div>
-          <div className="form-group">
+          <div className={`form-group${fieldErrors["lead.designation"] ? " has-error" : ""}`}>
             <label htmlFor="designation">Designation</label>
             <input
               id="designation"
-              required
               value={lead.designation}
-              onChange={(e) => setLead({ ...lead, designation: e.target.value })}
+              onChange={(e) => updateLead("designation", e.target.value)}
+              onBlur={() => markTouchedAndValidate()}
               placeholder="e.g. Donor, Community Partner, Guest"
+              aria-invalid={Boolean(fieldErrors["lead.designation"])}
             />
+            <FieldError message={fieldErrors["lead.designation"]} />
           </div>
           <div className="form-group">
             <label htmlFor="dietary">
@@ -216,7 +283,7 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
             <textarea
               id="dietary"
               value={lead.dietaryNote}
-              onChange={(e) => setLead({ ...lead, dietaryNote: e.target.value })}
+              onChange={(e) => updateLead("dietaryNote", e.target.value)}
               placeholder="e.g. vegetarian, no nuts"
             />
           </div>
@@ -224,7 +291,7 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
 
         <fieldset className="form-section">
           <legend>When are you coming?</legend>
-          <div className="form-group">
+          <div className={`form-group${fieldErrors.date ? " has-error" : ""}`}>
             <span className="field-label">Date</span>
             <div className="date-list" role="radiogroup" aria-label="Event date">
               {dates.map(([eventDate]) => {
@@ -234,14 +301,22 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
                     <input
                       type="radio"
                       name="date"
-                      required
                       checked={date === eventDate}
                       onChange={() => {
                         setDate(eventDate);
                         setSlotKey("");
                         setPax(1);
                         setCompanions([]);
+                        syncErrors(
+                          draftSnapshot({
+                            date: eventDate,
+                            slotKey: "",
+                            pax: 1,
+                            companions: [],
+                          }),
+                        );
                       }}
+                      onBlur={() => markTouchedAndValidate()}
                     />
                     <span className="date-option-face">
                       <span className="date-num">{d.getDate()}</span>
@@ -258,10 +333,11 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
                 );
               })}
             </div>
+            <FieldError message={fieldErrors.date} />
           </div>
 
           {date ? (
-            <div className="form-group">
+            <div className={`form-group${fieldErrors.slotKey ? " has-error" : ""}`}>
               <span className="field-label">Sitting</span>
               <div className="slot-list" role="radiogroup" aria-label="Sitting">
                 {daySessions.map((session) => {
@@ -274,16 +350,18 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
                       <input
                         type="radio"
                         name="slot"
-                        required
                         disabled={full}
                         checked={slotKey === session.slot_key}
                         onChange={() => onPickSlot(session.slot_key)}
+                        onBlur={() => markTouchedAndValidate()}
                       />
                       <span className="slot-option-face">
                         <span className="slot-time">{formatClock(session.starts_at)}</span>
                         <span className="slot-name">{session.slot_label}</span>
                         <span className="slot-meta">{arriveHint(session.starts_at)}</span>
-                        <span className={`seat-badge${session.seats_left === session.capacity ? " open" : ""}`}>
+                        <span
+                          className={`seat-badge${session.seats_left === session.capacity ? " open" : ""}`}
+                        >
                           {full ? "Full" : `${session.seats_left} left`}
                         </span>
                       </span>
@@ -291,6 +369,7 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
                   );
                 })}
               </div>
+              <FieldError message={fieldErrors.slotKey} />
             </div>
           ) : null}
         </fieldset>
@@ -338,57 +417,57 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
             {companions.map((guest, idx) => (
               <div className="companion-card" key={idx}>
                 <h3>Guest {idx + 2}</h3>
-                <div className="form-group">
+                <div
+                  className={`form-group${fieldErrors[`companions.${idx}.fullName`] ? " has-error" : ""}`}
+                >
                   <label>Full name</label>
                   <input
-                    required
                     value={guest.fullName}
-                    onChange={(e) => {
-                      const next = [...companions];
-                      next[idx] = { ...guest, fullName: e.target.value };
-                      setCompanions(next);
-                    }}
+                    onChange={(e) => updateCompanion(idx, "fullName", e.target.value)}
+                    onBlur={() => markTouchedAndValidate()}
+                    aria-invalid={Boolean(fieldErrors[`companions.${idx}.fullName`])}
                   />
+                  <FieldError message={fieldErrors[`companions.${idx}.fullName`]} />
                 </div>
                 <div className="form-row">
-                  <div className="form-group">
+                  <div
+                    className={`form-group${fieldErrors[`companions.${idx}.phone`] ? " has-error" : ""}`}
+                  >
                     <label>Phone</label>
                     <input
                       type="tel"
-                      required
                       value={guest.phone}
-                      onChange={(e) => {
-                        const next = [...companions];
-                        next[idx] = { ...guest, phone: e.target.value };
-                        setCompanions(next);
-                      }}
+                      onChange={(e) => updateCompanion(idx, "phone", e.target.value)}
+                      onBlur={() => markTouchedAndValidate()}
+                      aria-invalid={Boolean(fieldErrors[`companions.${idx}.phone`])}
                     />
+                    <FieldError message={fieldErrors[`companions.${idx}.phone`]} />
                   </div>
-                  <div className="form-group">
+                  <div
+                    className={`form-group${fieldErrors[`companions.${idx}.email`] ? " has-error" : ""}`}
+                  >
                     <label>Email</label>
                     <input
                       type="email"
-                      required
                       value={guest.email}
-                      onChange={(e) => {
-                        const next = [...companions];
-                        next[idx] = { ...guest, email: e.target.value };
-                        setCompanions(next);
-                      }}
+                      onChange={(e) => updateCompanion(idx, "email", e.target.value)}
+                      onBlur={() => markTouchedAndValidate()}
+                      aria-invalid={Boolean(fieldErrors[`companions.${idx}.email`])}
                     />
+                    <FieldError message={fieldErrors[`companions.${idx}.email`]} />
                   </div>
                 </div>
-                <div className="form-group">
+                <div
+                  className={`form-group${fieldErrors[`companions.${idx}.designation`] ? " has-error" : ""}`}
+                >
                   <label>Designation</label>
                   <input
-                    required
                     value={guest.designation}
-                    onChange={(e) => {
-                      const next = [...companions];
-                      next[idx] = { ...guest, designation: e.target.value };
-                      setCompanions(next);
-                    }}
+                    onChange={(e) => updateCompanion(idx, "designation", e.target.value)}
+                    onBlur={() => markTouchedAndValidate()}
+                    aria-invalid={Boolean(fieldErrors[`companions.${idx}.designation`])}
                   />
+                  <FieldError message={fieldErrors[`companions.${idx}.designation`]} />
                 </div>
                 <div className="form-group">
                   <label>
@@ -396,11 +475,7 @@ export function RsvpForm({ sessions }: { sessions: DinnerSession[] }) {
                   </label>
                   <input
                     value={guest.dietaryNote}
-                    onChange={(e) => {
-                      const next = [...companions];
-                      next[idx] = { ...guest, dietaryNote: e.target.value };
-                      setCompanions(next);
-                    }}
+                    onChange={(e) => updateCompanion(idx, "dietaryNote", e.target.value)}
                   />
                 </div>
               </div>
