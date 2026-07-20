@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { deleteSessionRegistrations } from "@/app/actions/admin-data";
 
@@ -7,11 +8,16 @@ export function ClearSitting({
   sessionId,
   sessionLabel,
   guestCount,
+  buttonClassName = "btn btn-ghost clear-sitting-btn",
+  buttonLabel = "Clear sitting…",
 }: {
   sessionId: string;
   sessionLabel: string;
   guestCount: number;
+  buttonClassName?: string;
+  buttonLabel?: string;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
@@ -33,6 +39,7 @@ export function ClearSitting({
         return;
       }
       close();
+      router.refresh();
     });
   }
 
@@ -40,11 +47,11 @@ export function ClearSitting({
     <>
       <button
         type="button"
-        className="btn btn-ghost clear-sitting-btn"
+        className={buttonClassName}
         disabled={guestCount === 0}
         onClick={() => setOpen(true)}
       >
-        Clear sitting…
+        {buttonLabel}
       </button>
 
       {open ? (

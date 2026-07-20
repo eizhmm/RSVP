@@ -1,9 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { deleteAllRegistrations } from "@/app/actions/admin-data";
 
-export function DangerZone() {
+export function DangerZone({ embedded = false }: { embedded?: boolean }) {
+  const router = useRouter();
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
@@ -18,13 +20,17 @@ export function DangerZone() {
         return;
       }
       setConfirm("");
+      router.refresh();
     });
   }
 
   return (
-    <section className="danger-zone" aria-labelledby="danger-zone-title">
-      <div className="danger-zone-rule" aria-hidden="true" />
-      <h2 id="danger-zone-title">Danger zone</h2>
+    <section
+      className={`danger-zone${embedded ? " danger-zone-embedded" : ""}`}
+      aria-labelledby="danger-zone-title"
+    >
+      {!embedded ? <div className="danger-zone-rule" aria-hidden="true" /> : null}
+      <h2 id="danger-zone-title">{embedded ? "Delete all registrations" : "Danger zone"}</h2>
       <p className="danger-zone-disclaimer">
         Deleting registrations is irreversible. All guest and party records will be removed and
         seats will become available again. Dinner sittings and capacities are not deleted.
