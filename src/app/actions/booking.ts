@@ -21,7 +21,18 @@ export type BookingResult =
 
 function mapDbError(message: string) {
   if (message.includes("SESSION_FULL")) return "Not enough seats left for this party size.";
-  if (message.includes("EMAIL_ALREADY_REGISTERED")) return "This email already has a reservation.";
+  if (message.includes("EMAIL_ALREADY_REGISTERED"))
+    return "This email is already registered. Each guest may only reserve once.";
+  if (message.includes("PHONE_ALREADY_REGISTERED"))
+    return "This phone number is already registered. Each guest may only reserve once.";
+  if (message.includes("DUPLICATE_EMAIL_IN_PARTY"))
+    return "Each guest in your party needs a different email.";
+  if (message.includes("DUPLICATE_PHONE_IN_PARTY"))
+    return "Each guest in your party needs a different phone number.";
+  if (message.includes("rsvp_guests_email_lower") || message.includes("lead_email_lower"))
+    return "This email is already registered. Each guest may only reserve once.";
+  if (message.includes("rsvp_guests_phone_digits"))
+    return "This phone number is already registered. Each guest may only reserve once.";
   if (message.includes("SESSION_NOT_FOUND")) return "That sitting was not found.";
   if (message.includes("COMPANION_COUNT_MISMATCH")) return "Please fill in every guest you are bringing.";
   return "Could not complete reservation. Please try again.";

@@ -44,6 +44,36 @@ export const bookingSchema = z
         path: ["companions"],
       });
     }
+
+    const guests = [data.lead, ...data.companions];
+    const emails = guests.map((g) => g.email.trim().toLowerCase());
+    const phones = guests.map((g) => g.phone.replace(/\D/g, ""));
+
+    emails.forEach((email, i) => {
+      if (!email) return;
+      if (emails.findIndex((e) => e === email) !== i) {
+        const path =
+          i === 0 ? (["lead", "email"] as const) : (["companions", i - 1, "email"] as const);
+        ctx.addIssue({
+          code: "custom",
+          message: "This email is already used in your party",
+          path: [...path],
+        });
+      }
+    });
+
+    phones.forEach((phone, i) => {
+      if (!phone) return;
+      if (phones.findIndex((p) => p === phone) !== i) {
+        const path =
+          i === 0 ? (["lead", "phone"] as const) : (["companions", i - 1, "phone"] as const);
+        ctx.addIssue({
+          code: "custom",
+          message: "This phone is already used in your party",
+          path: [...path],
+        });
+      }
+    });
   });
 
 export type BookingInput = z.infer<typeof bookingSchema>;
@@ -120,6 +150,22 @@ export function validateBookingDraft(draft: BookingDraft): FieldErrors {
   if (draft.companions.length !== Math.max(0, draft.pax - 1)) {
     errors.companions = "Please fill details for every guest in your party";
   }
+
+  const guests = [draft.lead, ...draft.companions];
+  const emails = guests.map((g) => g.email.trim().toLowerCase());
+  const phones = guests.map((g) => g.phone.replace(/\D/g, ""));
+
+  emails.forEach((email, i) => {
+    if (!email || emails.findIndex((e) => e === email) === i) return;
+    const key = i === 0 ? "lead.email" : `companions.${i - 1}.email`;
+    if (!errors[key]) errors[key] = "This email is already used in your party";
+  });
+
+  phones.forEach((phone, i) => {
+    if (!phone || phones.findIndex((p) => p === phone) === i) return;
+    const key = i === 0 ? "lead.phone" : `companions.${i - 1}.phone`;
+    if (!errors[key]) errors[key] = "This phone is already used in your party";
+  });
 
   return errors;
 }
