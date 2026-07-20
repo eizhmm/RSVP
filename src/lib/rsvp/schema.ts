@@ -11,7 +11,7 @@ const guestSchema = z.object({
 export const bookingSchema = z
   .object({
     slotKey: z.string().min(1),
-    pax: z.number().int().min(1).max(5),
+    pax: z.number().int().min(1).max(30),
     lead: guestSchema,
     companions: z.array(guestSchema),
   })

@@ -83,7 +83,7 @@ export default async function HomePage() {
               <li>
                 <span className="dot" aria-hidden="true" />
                 <div>
-                  <strong>Only 5 seats per sitting</strong>
+                  <strong>30 seats across four sittings</strong>
                   <span className="muted">Intimate by design — reserve early</span>
                 </div>
               </li>

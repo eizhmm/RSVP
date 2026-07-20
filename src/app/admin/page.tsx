@@ -42,7 +42,7 @@ export default async function AdminPage() {
       <div className="admin-wrap">
         <h1 style={{ fontSize: "1.85rem", marginBottom: "0.35rem" }}>Registration report</h1>
         <p className="muted" style={{ marginBottom: "0.35rem" }}>
-          Charity Donation Dinner · 15–16 Aug 2026 · Capacity 5 per sitting
+          Charity Donation Dinner · 15–16 Aug 2026 · 30 seats total
         </p>
         <p className="muted" style={{ marginBottom: "1.5rem" }}>
           Venue: {VENUE.name} · {VENUE.address}

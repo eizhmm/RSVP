@@ -2,10 +2,10 @@
 
 insert into public.dinner_sessions (event_date, slot_key, slot_label, starts_at, capacity)
 values
-  ('2026-08-15', 'sat-18', 'Early seating', '18:00', 5),
-  ('2026-08-15', 'sat-20', 'Main seating', '20:00', 5),
-  ('2026-08-16', 'sun-18', 'Early seating', '18:00', 5),
-  ('2026-08-16', 'sun-20', 'Main seating', '20:00', 5)
+  ('2026-08-15', 'sat-18', 'Early seating', '18:00', 8),
+  ('2026-08-15', 'sat-20', 'Main seating', '20:00', 8),
+  ('2026-08-16', 'sun-18', 'Early seating', '18:00', 7),
+  ('2026-08-16', 'sun-20', 'Main seating', '20:00', 7)
 on conflict (slot_key) do nothing;
 
 do $$

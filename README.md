@@ -56,5 +56,5 @@ Add the same env vars in the Vercel project settings (Production + Preview).
 
 Schema lives in `supabase/migrations/`. Already applied to the RSVP project:
 
-- 4 sittings (15–16 Aug 2026, 6 PM / 8 PM, capacity 5)
+- 4 sittings (15–16 Aug 2026, 6 PM / 8 PM, **30 seats total**: 8+8+7+7)
 - 3 seed guests on Sat 6 PM
