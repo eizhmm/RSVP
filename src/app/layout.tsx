@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
-import "./globals.css";
 import "./kind-table.css";
 
 const display = Cormorant_Garamond({
