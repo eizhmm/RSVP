@@ -97,15 +97,6 @@ export type BookingDraft = {
   companions: DraftGuest[];
 };
 
-function flattenIssues(issues: z.ZodIssue[]): FieldErrors {
-  const errors: FieldErrors = {};
-  for (const issue of issues) {
-    const key = issue.path.length ? issue.path.join(".") : "_form";
-    if (!errors[key]) errors[key] = issue.message;
-  }
-  return errors;
-}
-
 /** Client-side draft validation — errors persist until each field is valid. */
 export function validateBookingDraft(draft: BookingDraft): FieldErrors {
   const errors: FieldErrors = {};
@@ -168,10 +159,4 @@ export function validateBookingDraft(draft: BookingDraft): FieldErrors {
   });
 
   return errors;
-}
-
-export function validateBookingPayload(raw: unknown): FieldErrors {
-  const parsed = bookingSchema.safeParse(raw);
-  if (parsed.success) return {};
-  return flattenIssues(parsed.error.issues);
 }
